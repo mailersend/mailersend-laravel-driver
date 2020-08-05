@@ -4,6 +4,7 @@ namespace MailerSend\LaravelDriver;
 
 use Illuminate\Mail\Transport\Transport;
 use Illuminate\Support\Arr;
+use MailerSend\Helpers\Builder\Attachment;
 use MailerSend\Helpers\Builder\Recipient;
 use MailerSend\MailerSend;
 use Swift_Mime_SimpleMessage;
@@ -115,10 +116,7 @@ class MailerSendTransport extends Transport
         $attachments = [];
 
         foreach ($message->getChildren() as $attachment) {
-            $attachments[] = [
-                'content' => base64_encode($attachment->getBody()),
-                'filename' => $attachment->getFilename(),
-            ];
+            $attachments[] = new Attachment($attachment->getBody(), $attachment->getFilename());
         }
 
         return $attachments;
