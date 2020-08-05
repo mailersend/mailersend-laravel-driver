@@ -21,6 +21,9 @@ class MailerSendTransport extends Transport
 
         $this->mailersend = new MailerSend([
             'api_key' => Arr::get($this->config, 'api_key'),
+            'host' => Arr::get($this->config, 'host'),
+            'protocol' => Arr::get($this->config, 'protocol'),
+            'api_path' => Arr::get($this->config, 'api_path'),
         ]);
     }
 
