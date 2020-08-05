@@ -1,0 +1,3 @@
+[submodule "mailersend-php"]
+	path = mailersend-php
+	url = git@github.com:mailersend/mailersend-php.git
