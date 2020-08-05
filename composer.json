@@ -32,8 +32,8 @@
     },
     "repositories": [
         {
-            "type": "path",
-            "url": "mailersend-php"
+            "type": "vcs",
+            "url": "git@github.com:mailersend/mailersend-php.git"
         }
     ],
     "autoload": {

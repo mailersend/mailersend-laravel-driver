@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ec80003c1b70bc297bc374a7282e845a",
+    "content-hash": "57b7dca945e70b3e122e2372921f895a",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -919,10 +919,16 @@
         {
             "name": "mailersend/mailersend",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:mailersend/mailersend-php.git",
+                "reference": "232e76a74dc5284dcdb098a3d2e0d249f79c299d"
+            },
             "dist": {
-                "type": "path",
-                "url": "mailersend-php",
-                "reference": "128112734fc01285007c37bc40a8d134c6c27f7b"
+                "type": "zip",
+                "url": "https://api.github.com/repos/mailersend/mailersend-php/zipball/232e76a74dc5284dcdb098a3d2e0d249f79c299d",
+                "reference": "232e76a74dc5284dcdb098a3d2e0d249f79c299d",
+                "shasum": ""
             },
             "require": {
                 "beberlei/assert": "^3.2",
@@ -978,7 +984,12 @@
                 "email",
                 "mailersend",
                 "transactional"
-            ]
+            ],
+            "support": {
+                "source": "https://github.com/mailersend/mailersend-php/tree/master",
+                "issues": "https://github.com/mailersend/mailersend-php/issues"
+            },
+            "time": "2020-08-05T13:10:44+00:00"
         },
         {
             "name": "monolog/monolog",
