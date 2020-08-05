@@ -1,0 +1,56 @@
+{
+    "name": "mailersend/laravel-driver",
+    "description": "MailerSend Laravel Driver",
+    "keywords": [
+        "MailerSend",
+        "mailersend",
+        "email",
+        "transactional",
+        "laravel-driver"
+    ],
+    "homepage": "https://github.com/mailersend/mailersend-laravel-driver",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+          "name": "Tautvydas Tijūnaitis",
+          "email": "tautvydas@mailersend.com",
+          "homepage": "https://mailersend.com",
+          "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "illuminate/support": "^7.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^5.0",
+        "phpunit/phpunit": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MailerSend\\LaravelDriver\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MailerSend\\LaravelDriver\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MailerSend\\LaravelDriver\\LaravelDriverServiceProvider"
+            ],
+            "aliases": {
+                "LaravelDriver": "MailerSend\\LaravelDriver\\LaravelDriverFacade"
+            }
+        }
+    }
+}
