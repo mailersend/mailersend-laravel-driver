@@ -34,16 +34,18 @@ After that, you need to set `MAILERSEND_API_KEY` in your `.env` file:
 MAILERSEND_API_KEY=
 ```
 
-And enable MailerSend as a Laravel Mail Driver in `config/mail.php`
+Add MailerSend as a Laravel Mailer in `config/mail.php` in `mailers` array:
 
 ```php
-'driver' => env('MAIL_DRIVER', 'mailersend'),
+'mailersend' => [
+    'transport' => 'mailersend',
+],
 ```
 
-Or by setting the environment variable `MAIL_DRIVER` in your `.env` file
+And set environment variable `MAIL_MAILER` in your `.env` file
 
 ```php
-MAIL_DRIVER=mailersend
+MAIL_MAILER=mailersend
 ```
 
 <a name="usage"></a>
