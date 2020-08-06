@@ -7,6 +7,8 @@ use Illuminate\Support\Arr;
 use MailerSend\Helpers\Builder\Attachment;
 use MailerSend\Helpers\Builder\Recipient;
 use MailerSend\MailerSend;
+use Swift_Attachment;
+use Swift_Image;
 use Swift_Mime_SimpleMessage;
 use Swift_MimePart;
 
@@ -43,8 +45,8 @@ class MailerSendTransport extends Transport
             $fromName,
             $to,
             $subject,
-            $text,
             $html,
+            $text,
             null, // TODO Template
             [], // TODO Tags
             [], // TODO Variables
@@ -119,7 +121,7 @@ class MailerSendTransport extends Transport
         $attachments = [];
 
         foreach ($message->getChildren() as $attachment) {
-            if (!$attachment->getFilename()) {
+            if (!$attachment instanceof Swift_Attachment && !$attachment instanceof Swift_Image) {
                 continue;
             }
 
