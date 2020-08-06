@@ -34,18 +34,21 @@ class MailerSendTransport extends Transport
 
         ['email' => $fromEmail, 'name' => $fromName] = $this->getFrom($message);
         ['text' => $text, 'html' => $html] = $this->getContents($message);
+        $to = $this->getTo($message);
+        $subject = $message->getSubject();
+        $attachments = $this->getAttachments($message);
 
         $this->mailersend->email->send(
             $fromEmail,
             $fromName,
-            $this->getTo($message),
-            $message->getSubject(),
+            $to,
+            $subject,
             $text,
             $html,
             null, // TODO Template
             [], // TODO Tags
             [], // TODO Variables
-            $this->getAttachments($message),
+            $attachments
         );
 
         $this->sendPerformed($message);
