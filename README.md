@@ -48,6 +48,13 @@ And set environment variable `MAIL_MAILER` in your `.env` file
 MAIL_MAILER=mailersend
 ```
 
+Also, double check that your `FROM` data is filled in `.env`:
+
+```
+MAIL_FROM_ADDRESS=app@yourdomain.com
+MAIL_FROM_NAME="App Name"
+```
+
 <a name="usage"></a>
 # Usage
 

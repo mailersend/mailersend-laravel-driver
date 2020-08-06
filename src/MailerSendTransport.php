@@ -116,6 +116,10 @@ class MailerSendTransport extends Transport
         $attachments = [];
 
         foreach ($message->getChildren() as $attachment) {
+            if (!$attachment->getFilename()) {
+                continue;
+            }
+
             $attachments[] = new Attachment($attachment->getBody(), $attachment->getFilename());
         }
 
