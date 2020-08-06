@@ -14,6 +14,8 @@ use Swift_MimePart;
 
 class MailerSendTransport extends Transport
 {
+    const MAILERSEND_DATA = 'text/mailersend-data';
+
     protected array $config;
 
     protected MailerSend $mailersend;
@@ -30,6 +32,11 @@ class MailerSendTransport extends Transport
         ]);
     }
 
+    /**
+     * @throws \Assert\AssertionFailedException
+     * @throws \JsonException
+     * @throws \Psr\Http\Client\ClientExceptionInterface
+     */
     public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = null)
     {
         $this->beforeSendPerformed($message);
@@ -39,6 +46,8 @@ class MailerSendTransport extends Transport
         $to = $this->getTo($message);
         $subject = $message->getSubject();
         $attachments = $this->getAttachments($message);
+
+        $additionalData = $this->getAdditionalData($message);
 
         $this->mailersend->email->send(
             $fromEmail,
@@ -129,5 +138,31 @@ class MailerSendTransport extends Transport
         }
 
         return $attachments;
+    }
+
+    /**
+     * @param  Swift_Mime_SimpleMessage  $message
+     * @param  array  $payload
+     */
+    protected function getAdditionalData(Swift_Mime_SimpleMessage $message): array
+    {
+        /** @var \Swift_Mime_SimpleMimeEntity $dataPart */
+        $dataPart = null;
+
+        $children = collect($message->getChildren())
+            ->reject(function (\Swift_Mime_SimpleMimeEntity $entity) use (&$dataPart) {
+                if ($entity->getContentType() === self::MAILERSEND_DATA) {
+                    $dataPart = $entity;
+                    return true;
+                }
+            });
+
+        if (!$dataPart) {
+            return [];
+        }
+
+        $message->setChildren($children->toArray());
+
+        return json_decode($dataPart->getBody(), true, 512, JSON_THROW_ON_ERROR);
     }
 }
