@@ -14,7 +14,11 @@ use Swift_MimePart;
 
 class MailerSendTransport extends Transport
 {
-    const MAILERSEND_DATA = 'text/mailersend-data';
+    public const MAILERSEND_DATA = 'text/mailersend-data';
+
+    public const MAILERSEND_DATA_TEMPLATE_ID = 'template_id';
+    public const MAILERSEND_DATA_VARIABLES = 'variables';
+    public const MAILERSEND_DATA_TAGS = 'tags';
 
     protected array $config;
 
@@ -46,8 +50,8 @@ class MailerSendTransport extends Transport
         $to = $this->getTo($message);
         $subject = $message->getSubject();
         $attachments = $this->getAttachments($message);
-
-        $additionalData = $this->getAdditionalData($message);
+        ['template_id' => $template_id, 'variables' => $variables, 'tags' => $tags]
+            = $this->getAdditionalData($message);
 
         $this->mailersend->email->send(
             $fromEmail,
@@ -56,9 +60,9 @@ class MailerSendTransport extends Transport
             $subject,
             $html,
             $text,
-            null, // TODO Template
-            [], // TODO Tags
-            [], // TODO Variables
+            $template_id,
+            $tags,
+            $variables,
             $attachments
         );
 
@@ -163,6 +167,13 @@ class MailerSendTransport extends Transport
 
         $message->setChildren($children->toArray());
 
-        return json_decode($dataPart->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $defaultValues = [
+            'template_id' => null,
+            'variables' => [],
+            'tags' => [],
+        ];
+
+        return array_merge($defaultValues,
+            json_decode($dataPart->getBody(), true, 512, JSON_THROW_ON_ERROR));
     }
 }
