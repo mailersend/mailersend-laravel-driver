@@ -138,7 +138,8 @@ class MailerSendTransport extends Transport
                 continue;
             }
 
-            $attachments[] = new Attachment($attachment->getBody(), $attachment->getFilename());
+            $attachments[] = new Attachment($attachment->getBody(), $attachment->getFilename(),
+                $attachment->getDisposition(), $attachment->getId());
         }
 
         return $attachments;
@@ -150,6 +151,12 @@ class MailerSendTransport extends Transport
      */
     protected function getAdditionalData(Swift_Mime_SimpleMessage $message): array
     {
+        $defaultValues = [
+            'template_id' => null,
+            'variables' => [],
+            'tags' => [],
+        ];
+
         /** @var \Swift_Mime_SimpleMimeEntity $dataPart */
         $dataPart = null;
 
@@ -162,16 +169,10 @@ class MailerSendTransport extends Transport
             });
 
         if (!$dataPart) {
-            return [];
+            return $defaultValues;
         }
 
         $message->setChildren($children->toArray());
-
-        $defaultValues = [
-            'template_id' => null,
-            'variables' => [],
-            'tags' => [],
-        ];
 
         return array_merge($defaultValues,
             json_decode($dataPart->getBody(), true, 512, JSON_THROW_ON_ERROR));
