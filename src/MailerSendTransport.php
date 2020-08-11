@@ -5,6 +5,7 @@ namespace MailerSend\LaravelDriver;
 use Illuminate\Mail\Transport\Transport;
 use Illuminate\Support\Arr;
 use MailerSend\Helpers\Builder\Attachment;
+use MailerSend\Helpers\Builder\EmailParams;
 use MailerSend\Helpers\Builder\Recipient;
 use MailerSend\MailerSend;
 use Swift_Attachment;
@@ -46,6 +47,7 @@ class MailerSendTransport extends Transport
         $this->beforeSendPerformed($message);
 
         ['email' => $fromEmail, 'name' => $fromName] = $this->getFrom($message);
+        ['email' => $replyToEmail, 'name' => $replyToName] = $this->getReplyTo($message);
         ['text' => $text, 'html' => $html] = $this->getContents($message);
         $to = $this->getTo($message);
         $subject = $message->getSubject();
@@ -53,18 +55,21 @@ class MailerSendTransport extends Transport
         ['template_id' => $template_id, 'variables' => $variables, 'tags' => $tags]
             = $this->getAdditionalData($message);
 
-        $this->mailersend->email->send(
-            $fromEmail,
-            $fromName,
-            $to,
-            $subject,
-            $html,
-            $text,
-            $template_id,
-            $tags,
-            $variables,
-            $attachments
-        );
+        $emailParams = (new EmailParams())
+            ->setFrom($fromEmail)
+            ->setFromName($fromName)
+            ->setReplyTo($replyToEmail)
+            ->setReplyToName($replyToName)
+            ->setRecipients($to)
+            ->setSubject($subject)
+            ->setHtml($html)
+            ->setText($text)
+            ->setTemplateId($template_id)
+            ->setVariables($variables)
+            ->setAttachments($attachments)
+            ->setTags($tags);
+
+        $this->mailersend->email->send($emailParams);
 
         $this->sendPerformed($message);
 
@@ -78,17 +83,28 @@ class MailerSendTransport extends Transport
                 return ['email' => $email, 'name' => $name];
             }
         }
+
         return ['email' => '', 'name' => ''];
     }
+
+    protected function getReplyTo(Swift_Mime_SimpleMessage $message)
+    {
+        if ($message->getReplyTo()) {
+            foreach ($message->getReplyTo() as $email => $name) {
+                return ['email' => $email, 'name' => $name];
+            }
+        }
+
+        return ['email' => '', 'name' => ''];
+    }
+
 
     protected function getTo(Swift_Mime_SimpleMessage $message): array
     {
         $recipients = [];
 
-        if ($message->getTo()) {
-            foreach ($message->getTo() as $email => $name) {
-                $recipients[] = new Recipient($email, $name);
-            }
+        foreach ($message->getTo() as $email => $name) {
+            $recipients[] = new Recipient($email, $name);
         }
 
         return $recipients;
