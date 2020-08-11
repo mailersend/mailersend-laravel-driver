@@ -3,7 +3,9 @@
 namespace MailerSend\LaravelDriver;
 
 use Illuminate\Mail\MailManager;
+use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
+use MailerSend\MailerSend;
 
 class LaravelDriverServiceProvider extends ServiceProvider
 {
@@ -12,7 +14,14 @@ class LaravelDriverServiceProvider extends ServiceProvider
         $this->app->make(MailManager::class)->extend('mailersend', function () {
             $config = $this->app['config']->get('mailersend-driver', []);
 
-            return new MailerSendTransport($config);
+            $mailersend = new MailerSend([
+                'api_key' => Arr::get($config, 'api_key'),
+                'host' => Arr::get($config, 'host'),
+                'protocol' => Arr::get($config, 'protocol'),
+                'api_path' => Arr::get($config, 'api_path'),
+            ]);
+
+            return new MailerSendTransport($mailersend);
         });
 
         if ($this->app->runningInConsole()) {

@@ -3,11 +3,11 @@
 namespace MailerSend\LaravelDriver;
 
 use Illuminate\Mail\Transport\Transport;
-use Illuminate\Support\Arr;
 use MailerSend\Helpers\Builder\Attachment;
 use MailerSend\Helpers\Builder\EmailParams;
 use MailerSend\Helpers\Builder\Recipient;
 use MailerSend\MailerSend;
+use Psr\Http\Message\ResponseInterface;
 use Swift_Attachment;
 use Swift_Image;
 use Swift_Mime_SimpleMessage;
@@ -21,20 +21,11 @@ class MailerSendTransport extends Transport
     public const MAILERSEND_DATA_VARIABLES = 'variables';
     public const MAILERSEND_DATA_TAGS = 'tags';
 
-    protected array $config;
-
     protected MailerSend $mailersend;
 
-    public function __construct(array $config)
+    public function __construct(MailerSend $mailersend)
     {
-        $this->config = $config;
-
-        $this->mailersend = new MailerSend([
-            'api_key' => Arr::get($this->config, 'api_key'),
-            'host' => Arr::get($this->config, 'host'),
-            'protocol' => Arr::get($this->config, 'protocol'),
-            'api_path' => Arr::get($this->config, 'api_path'),
-        ]);
+        $this->mailersend = $mailersend;
     }
 
     /**
@@ -55,7 +46,7 @@ class MailerSendTransport extends Transport
         ['template_id' => $template_id, 'variables' => $variables, 'tags' => $tags]
             = $this->getAdditionalData($message);
 
-        $emailParams = (new EmailParams())
+        $emailParams = app(EmailParams::class)
             ->setFrom($fromEmail)
             ->setFromName($fromName)
             ->setReplyTo($replyToEmail)
@@ -69,7 +60,18 @@ class MailerSendTransport extends Transport
             ->setAttachments($attachments)
             ->setTags($tags);
 
-        $this->mailersend->email->send($emailParams);
+        $response = $this->mailersend->email->send($emailParams);
+
+        /** @var ResponseInterface $respInterface */
+        $respInterface = $response['response'];
+
+        if ($messageId = $respInterface->getHeaderLine('X-Message-Id')) {
+            $message->getHeaders()->addTextHeader('X-MailerSend-Message-Id', $messageId);
+        }
+
+        if ($body = $respInterface->getBody()->getContents()) {
+            $message->getHeaders()->addTextHeader('X-MailerSend-Body', $body);
+        }
 
         $this->sendPerformed($message);
 
