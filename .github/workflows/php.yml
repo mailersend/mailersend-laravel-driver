@@ -14,9 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup Composer Access
-      run: composer config -g github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
-
     - name: Cache Composer packages
       id: composer-cache
       uses: actions/cache@v2
