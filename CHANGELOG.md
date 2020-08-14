@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [0.1.1]
+
+### Removed
+
+- Repository reference for `mailersend/mailersend`
+
 ## [0.1.0]
 
 ### Added
