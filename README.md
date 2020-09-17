@@ -1,4 +1,4 @@
-<a href="https://www.mailersend.com"><img src="https://www.mailersend.com/site/themes/new/images/logo.svg" width="200px"/></a>
+<a href="https://www.mailersend.com"><img src="https://www.mailersend.com/images/logo.svg" width="200px"/></a>
 
 MailerSend Laravel Driver
 
