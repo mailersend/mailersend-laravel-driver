@@ -7,6 +7,7 @@ MailerSend Laravel Driver
 # Table of Contents
 
 * [Installation](#installation)
+* [Upgrade and Guzzle 6 support](#upgrade)
 * [Usage](#usage)
 * [Support and Feedback](#support-and-feedback)
 * [License](#license)
@@ -18,6 +19,7 @@ MailerSend Laravel Driver
 
 - Laravel 7.0+
 - PHP 7.4+
+- Guzzle 7.0+
 - An API Key from [mailersend.com](https://www.mailersend.com)
 
 ## Setup
@@ -54,6 +56,13 @@ Also, double check that your `FROM` data is filled in `.env`:
 MAIL_FROM_ADDRESS=app@yourdomain.com
 MAIL_FROM_NAME="App Name"
 ```
+
+<a name="upgrade"></a>
+# Upgrade and Guzzle 6 support
+
+## Upgrading from v0.1
+
+If you are upgrading from `v0.1` branches, please do note that you will need to upgrade Guzzle to atleast version 7. [Please consult official guide for more info](https://github.com/guzzle/guzzle/blob/master/UPGRADING.md).
 
 <a name="usage"></a>
 # Usage

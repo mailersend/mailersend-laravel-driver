@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.0]
+
+### Added
+
+- PHP 8 support
+- Laravel 8 support
+
+### Removed
+
+- Guzzle 6 support
+
 ## [0.1.1]
 
 ### Removed
