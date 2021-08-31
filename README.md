@@ -78,7 +78,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
-use MailerSend\Helpers\Builder\Personalization;use MailerSend\Helpers\Builder\Variable;
+use MailerSend\Helpers\Builder\Variable;
+use MailerSend\Helpers\Builder\Personalization;
 use MailerSend\LaravelDriver\MailerSendTrait;
 
 class TestEmail extends Mailable
