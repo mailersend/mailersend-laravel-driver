@@ -78,7 +78,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
-use MailerSend\Helpers\Builder\Variable;
+use MailerSend\Helpers\Builder\Personalization;use MailerSend\Helpers\Builder\Variable;
 use MailerSend\LaravelDriver\MailerSendTrait;
 
 class TestEmail extends Mailable
@@ -97,7 +97,24 @@ class TestEmail extends Mailable
                 [
                     new Variable($to, ['name' => 'Your Name'])
                 ],
-                ['tag']
+                ['tag'],
+                [
+                    new Personalization($to, [
+                        'var' => 'variable',
+                        'number' => 123,
+                        'object' => [
+                            'key' => 'object-value'
+                        ],
+                        'objectCollection' => [
+                            [
+                                'name' => 'John'
+                            ],
+                            [
+                                'name' => 'Patrick'
+                            ]
+                        ],
+                    ])
+                ]
             );
     }
 }
