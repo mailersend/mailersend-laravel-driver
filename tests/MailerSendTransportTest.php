@@ -188,5 +188,7 @@ class MailerSendTransportTest extends TestCase
             'variables'));
         self::assertEquals([], Arr::get($getAdditionalData,
             'tags'));
+        self::assertEquals([], Arr::get($getAdditionalData,
+            'personalization'));
     }
 }
