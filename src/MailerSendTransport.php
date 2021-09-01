@@ -20,6 +20,7 @@ class MailerSendTransport extends Transport
     public const MAILERSEND_DATA_TEMPLATE_ID = 'template_id';
     public const MAILERSEND_DATA_VARIABLES = 'variables';
     public const MAILERSEND_DATA_TAGS = 'tags';
+    public const MAILERSEND_DATA_PERSONALIZATION = 'personalization';
 
     protected MailerSend $mailersend;
 
@@ -43,7 +44,7 @@ class MailerSendTransport extends Transport
         $to = $this->getTo($message);
         $subject = $message->getSubject();
         $attachments = $this->getAttachments($message);
-        ['template_id' => $template_id, 'variables' => $variables, 'tags' => $tags]
+        ['template_id' => $template_id, 'variables' => $variables, 'tags' => $tags, 'personalization' => $personalization]
             = $this->getAdditionalData($message);
 
         $emailParams = app(EmailParams::class)
@@ -57,6 +58,7 @@ class MailerSendTransport extends Transport
             ->setText($text)
             ->setTemplateId($template_id)
             ->setVariables($variables)
+            ->setPersonalization($personalization)
             ->setAttachments($attachments)
             ->setTags($tags);
 
@@ -172,6 +174,7 @@ class MailerSendTransport extends Transport
         $defaultValues = [
             'template_id' => null,
             'variables' => [],
+            'personalization' => [],
             'tags' => [],
         ];
 
