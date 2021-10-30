@@ -42,6 +42,8 @@ class MailerSendTransport extends Transport
         ['email' => $replyToEmail, 'name' => $replyToName] = $this->getReplyTo($message);
         ['text' => $text, 'html' => $html] = $this->getContents($message);
         $to = $this->getTo($message);
+        $cc = $this->getCc($message);
+        $bcc = $this->getBcc($message);
         $subject = $message->getSubject();
         $attachments = $this->getAttachments($message);
         ['template_id' => $template_id, 'variables' => $variables, 'tags' => $tags, 'personalization' => $personalization]
@@ -53,6 +55,8 @@ class MailerSendTransport extends Transport
             ->setReplyTo($replyToEmail)
             ->setReplyToName($replyToName)
             ->setRecipients($to)
+            ->setCc($cc)
+            ->setBcc($bcc)
             ->setSubject($subject)
             ->setHtml($html)
             ->setText($text)
@@ -108,6 +112,28 @@ class MailerSendTransport extends Transport
         $recipients = [];
 
         foreach ($message->getTo() as $email => $name) {
+            $recipients[] = new Recipient($email, $name);
+        }
+
+        return $recipients;
+    }
+
+    protected function getCc(Swift_Mime_SimpleMessage $message): array
+    {
+        $recipients = [];
+
+        foreach (!is_null($message->getCc()) ? $message->getCc() : Array()  as $email => $name) {
+            $recipients[] = new Recipient($email, $name);
+        }
+
+        return $recipients;
+    }
+
+    protected function getBcc(Swift_Mime_SimpleMessage $message): array
+    {
+        $recipients = [];
+
+        foreach (!is_null($message->getBcc()) ? $message->getBcc() : Array()  as $email => $name) {
             $recipients[] = new Recipient($email, $name);
         }
 
