@@ -22,6 +22,10 @@ trait MailerSendTrait
                 $message->addPart(json_encode($mailersendData, JSON_THROW_ON_ERROR),
                     MailerSendTransport::MAILERSEND_DATA);
             });
+
+            if ($template_id !== null) {
+                $this->html('');
+            }
         }
 
         return $this;
