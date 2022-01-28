@@ -2,6 +2,7 @@
 
 namespace MailerSend\LaravelDriver;
 
+use Carbon\Carbon;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Arr;
 use Swift_Message;
@@ -14,7 +15,7 @@ trait MailerSendTrait
         array $tags = [],
         array $personalization = [],
         ?bool $precedenceBulkHeader = null,
-        ?int $sendAt = null
+        Carbon $sendAt = null
     )
     {
         if ($this instanceof Mailable && $this->driver() === 'mailersend') {
@@ -26,7 +27,7 @@ trait MailerSendTrait
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_TAGS, $tags);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PERSONALIZATION, $personalization);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PRECENDECE_BULK_HEADER, $precedenceBulkHeader);
-                Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_SEND_AT, $sendAt);
+                Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_SEND_AT, $sendAt->timestamp);
 
                 $message->addPart(json_encode($mailersendData, JSON_THROW_ON_ERROR),
                     MailerSendTransport::MAILERSEND_DATA);

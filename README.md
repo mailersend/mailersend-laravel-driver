@@ -123,7 +123,7 @@ class TestEmail extends Mailable
                 // Precedence bulk header
                 true,
                 // Send at
-                1643299962,
+                new Carbon('2022-01-28 11:53:20'),
             );
     }
 }
