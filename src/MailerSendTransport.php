@@ -21,6 +21,8 @@ class MailerSendTransport extends Transport
     public const MAILERSEND_DATA_VARIABLES = 'variables';
     public const MAILERSEND_DATA_TAGS = 'tags';
     public const MAILERSEND_DATA_PERSONALIZATION = 'personalization';
+    public const MAILERSEND_DATA_PRECENDECE_BULK_HEADER = 'precedence_bulk_header';
+    public const MAILERSEND_DATA_SEND_AT = 'send_at';
 
     protected MailerSend $mailersend;
 
@@ -46,7 +48,14 @@ class MailerSendTransport extends Transport
         $bcc = $this->getBcc($message);
         $subject = $message->getSubject();
         $attachments = $this->getAttachments($message);
-        ['template_id' => $template_id, 'variables' => $variables, 'tags' => $tags, 'personalization' => $personalization]
+        [
+            'template_id' => $template_id,
+            'variables' => $variables,
+            'tags' => $tags,
+            'personalization' => $personalization,
+            'precedence_bulk_header' => $precedenceBulkHeader,
+            'send_at' => $sendAt,
+        ]
             = $this->getAdditionalData($message);
 
         $emailParams = app(EmailParams::class)
@@ -64,7 +73,9 @@ class MailerSendTransport extends Transport
             ->setVariables($variables)
             ->setPersonalization($personalization)
             ->setAttachments($attachments)
-            ->setTags($tags);
+            ->setTags($tags)
+            ->setPrecedenceBulkHeader($precedenceBulkHeader)
+            ->setSendAt($sendAt);
 
         $response = $this->mailersend->email->send($emailParams);
 
@@ -202,6 +213,8 @@ class MailerSendTransport extends Transport
             'variables' => [],
             'personalization' => [],
             'tags' => [],
+            'precedence_bulk_header' => null,
+            'send_at' => null,
         ];
 
         /** @var \Swift_Mime_SimpleMimeEntity $dataPart */

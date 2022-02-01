@@ -119,7 +119,11 @@ class TestEmail extends Mailable
                             ]
                         ],
                     ])
-                ]
+                ],
+                // Precedence bulk header
+                true,
+                // Send at
+                new Carbon('2022-01-28 11:53:20'),
             );
     }
 }
@@ -135,7 +139,10 @@ After creating the mailable, you can send it using:
 use App\Mail\TestEmail;
 use Illuminate\Support\Facades\Mail;
 
-Mail::to('recipient@domain.com')->send(new TestEmail());
+Mail::to('recipient@domain.com')
+    ->cc('cc@domain.com')
+    ->bcc('bcc@domain.com')
+    ->send(new TestEmail());
 ```
 
 Please refer to [Laravel Mail documenation](https://laravel.com/docs/7.x/mail) and [MailerSend API documentation](https://developers.mailersend.com) for more information.
