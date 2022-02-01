@@ -27,7 +27,10 @@ trait MailerSendTrait
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_TAGS, $tags);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PERSONALIZATION, $personalization);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PRECENDECE_BULK_HEADER, $precedenceBulkHeader);
-                Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_SEND_AT, $sendAt->timestamp);
+
+                if ($sendAt) {
+                    Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_SEND_AT, $sendAt->timestamp);
+                }
 
                 $message->addPart(json_encode($mailersendData, JSON_THROW_ON_ERROR),
                     MailerSendTransport::MAILERSEND_DATA);
