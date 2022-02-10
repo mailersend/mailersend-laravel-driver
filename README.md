@@ -19,8 +19,8 @@ MailerSend Laravel Driver
 
 **If you require Laravel 9+ and PHP 8.0+ support, look into [main](https://github.com/mailersend/mailersend-laravel-driver/tree/main) branch**
 
-- Laravel 7.0+
-- PHP 7.4+
+- Laravel 7.x - 8.x
+- PHP 7.4 - 8.0
 - Guzzle 7.0+
 - An API Key from [mailersend.com](https://www.mailersend.com)
 
@@ -29,7 +29,7 @@ MailerSend Laravel Driver
 You can install the package via composer:
 
 ```bash
-composer require mailersend/laravel-driver
+composer require mailersend/laravel-driver:^1.0
 ```
 
 After that, you need to set `MAILERSEND_API_KEY` in your `.env` file:
