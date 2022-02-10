@@ -7,7 +7,6 @@ MailerSend Laravel Driver
 # Table of Contents
 
 * [Installation](#installation)
-* [Upgrade and Guzzle 6 support](#upgrade)
 * [Usage](#usage)
 * [Support and Feedback](#support-and-feedback)
 * [License](#license)
@@ -16,6 +15,8 @@ MailerSend Laravel Driver
 # Installation
 
 ## Requirements
+
+**For Laravel 7.x - 8.x support see [1.x branch](https://github.com/mailersend/mailersend-laravel-driver/tree/1.x)**
 
 - Laravel 9.0+
 - PHP 8.0+
@@ -57,13 +58,6 @@ MAIL_FROM_ADDRESS=app@yourdomain.com
 MAIL_FROM_NAME="App Name"
 ```
 
-<a name="upgrade"></a>
-# Upgrade and Guzzle 6 support
-
-## Upgrading from v0.1
-
-If you are upgrading from `v0.1` branches, please do note that you will need to upgrade Guzzle to atleast version 7. [Please consult official guide for more info](https://github.com/guzzle/guzzle/blob/master/UPGRADING.md).
-
 <a name="usage"></a>
 # Usage
 
@@ -88,21 +82,24 @@ class TestEmail extends Mailable
 
     public function build()
     {
+        // Recipient
         $to = Arr::get($this->to, '0.address');
 
-        return $this->view('emails.test_html')
+        return $this
+            ->view('emails.test_html')
             ->text('emails.test_text')
+            // Attachment (optional)
             ->attachFromStorageDisk('public', 'example.png')
             ->mailersend(
-                // Template ID
+                // Template ID (optional)
                 null,
-                // Variables for simple personalization
+                // Variables for simple personalization (optional)
                 [
                     new Variable($to, ['name' => 'Your Name'])
                 ],
-                // Tags
+                // Tags (optional)
                 ['tag'],
-                // Advanced personalization
+                // Advanced personalization (optional)
                 [
                     new Personalization($to, [
                         'var' => 'variable',
@@ -120,9 +117,9 @@ class TestEmail extends Mailable
                         ],
                     ])
                 ],
-                // Precedence bulk header
+                // Precedence bulk header (optional)
                 true,
-                // Send at
+                // Send at (optional)
                 new Carbon('2022-01-28 11:53:20'),
             );
     }
@@ -145,7 +142,7 @@ Mail::to('recipient@domain.com')
     ->send(new TestEmail());
 ```
 
-Please refer to [Laravel Mail documenation](https://laravel.com/docs/7.x/mail) and [MailerSend API documentation](https://developers.mailersend.com) for more information.
+Please refer to [Laravel Mail documenation](https://laravel.com/docs/9.x/mail) and [MailerSend API documentation](https://developers.mailersend.com) for more information.
 
 <a name="support-and-feedback"></a>
 # Support and Feedback
