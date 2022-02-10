@@ -2,20 +2,23 @@
 
 namespace MailerSend\LaravelDriver;
 
-use Illuminate\Mail\Transport\Transport;
 use MailerSend\Helpers\Builder\Attachment;
 use MailerSend\Helpers\Builder\EmailParams;
 use MailerSend\Helpers\Builder\Recipient;
 use MailerSend\MailerSend;
 use Psr\Http\Message\ResponseInterface;
-use Swift_Attachment;
-use Swift_Image;
-use Swift_Mime_SimpleMessage;
-use Swift_MimePart;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\SentMessage;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mime\Part\DataPart;
+use Symfony\Component\Mime\RawMessage;
+use function json_decode;
 
-class MailerSendTransport extends Transport
+class MailerSendTransport implements TransportInterface
 {
-    public const MAILERSEND_DATA = 'text/mailersend-data';
+    public const MAILERSEND_DATA_TYPE = 'text';
+    public const MAILERSEND_DATA_SUBTYPE = 'mailersend-data';
 
     public const MAILERSEND_DATA_TEMPLATE_ID = 'template_id';
     public const MAILERSEND_DATA_VARIABLES = 'variables';
@@ -35,19 +38,25 @@ class MailerSendTransport extends Transport
      * @throws \Assert\AssertionFailedException
      * @throws \JsonException
      * @throws \Psr\Http\Client\ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws \MailerSend\Exceptions\MailerSendAssertException
      */
-    public function send(Swift_Mime_SimpleMessage $message, &$failedRecipients = null)
+    public function send(RawMessage $message, Envelope $envelope = null): ?SentMessage
     {
-        $this->beforeSendPerformed($message);
-
         ['email' => $fromEmail, 'name' => $fromName] = $this->getFrom($message);
         ['email' => $replyToEmail, 'name' => $replyToName] = $this->getReplyTo($message);
-        ['text' => $text, 'html' => $html] = $this->getContents($message);
-        $to = $this->getTo($message);
-        $cc = $this->getCc($message);
-        $bcc = $this->getBcc($message);
+
+        $text = $message->getTextBody();
+        $html = $message->getHtmlBody();
+
+        $to = $this->getRecipients('to', $message);
+        $cc = $this->getRecipients('cc', $message);
+        $bcc = $this->getRecipients('bcc', $message);
+
         $subject = $message->getSubject();
+
         $attachments = $this->getAttachments($message);
+
         [
             'template_id' => $template_id,
             'variables' => $variables,
@@ -55,8 +64,7 @@ class MailerSendTransport extends Transport
             'personalization' => $personalization,
             'precedence_bulk_header' => $precedenceBulkHeader,
             'send_at' => $sendAt,
-        ]
-            = $this->getAdditionalData($message);
+        ] = $this->getAdditionalData($message);
 
         $emailParams = app(EmailParams::class)
             ->setFrom($fromEmail)
@@ -83,130 +91,82 @@ class MailerSendTransport extends Transport
         $respInterface = $response['response'];
 
         if ($messageId = $respInterface->getHeaderLine('X-Message-Id')) {
-            $message->getHeaders()->addTextHeader('X-MailerSend-Message-Id', $messageId);
+            $message->getHeaders()?->addTextHeader('X-MailerSend-Message-Id', $messageId);
         }
 
         if ($body = $respInterface->getBody()->getContents()) {
-            $message->getHeaders()->addTextHeader('X-MailerSend-Body', $body);
+            $message->getHeaders()?->addTextHeader('X-MailerSend-Body', $body);
         }
 
-        $this->sendPerformed($message);
-
-        return $this->numberOfRecipients($message);
+        return new SentMessage($message, $envelope);
     }
 
-    protected function getFrom(Swift_Mime_SimpleMessage $message): array
+    protected function getFrom(RawMessage $message): array
     {
-        if ($message->getFrom()) {
-            foreach ($message->getFrom() as $email => $name) {
-                return ['email' => $email, 'name' => $name];
-            }
+        $from = $message->getFrom();
+
+        if (count($from) > 0) {
+            return ['name' => $from[0]->getName(), 'email' => $from[0]->getAddress()];
         }
 
         return ['email' => '', 'name' => ''];
     }
 
-    protected function getReplyTo(Swift_Mime_SimpleMessage $message)
+    protected function getReplyTo(RawMessage $message): array
     {
-        if ($message->getReplyTo()) {
-            foreach ($message->getReplyTo() as $email => $name) {
-                return ['email' => $email, 'name' => $name];
-            }
+        $from = $message->getReplyTo();
+
+        if (count($from) > 0) {
+            return ['name' => $from[0]->getName(), 'email' => $from[0]->getAddress()];
         }
 
         return ['email' => '', 'name' => ''];
     }
 
-
-    protected function getTo(Swift_Mime_SimpleMessage $message): array
+    /**
+     * @throws \MailerSend\Exceptions\MailerSendAssertException
+     */
+    protected function getRecipients(string $type, RawMessage $message): array
     {
         $recipients = [];
 
-        foreach ($message->getTo() as $email => $name) {
-            $recipients[] = new Recipient($email, $name);
-        }
-
-        return $recipients;
-    }
-
-    protected function getCc(Swift_Mime_SimpleMessage $message): array
-    {
-        $recipients = [];
-
-        foreach (!is_null($message->getCc()) ? $message->getCc() : Array()  as $email => $name) {
-            $recipients[] = new Recipient($email, $name);
-        }
-
-        return $recipients;
-    }
-
-    protected function getBcc(Swift_Mime_SimpleMessage $message): array
-    {
-        $recipients = [];
-
-        foreach (!is_null($message->getBcc()) ? $message->getBcc() : Array()  as $email => $name) {
-            $recipients[] = new Recipient($email, $name);
-        }
-
-        return $recipients;
-    }
-
-    protected function getContents(Swift_Mime_SimpleMessage $message): array
-    {
-        $content = [
-            'text' => '',
-            'html' => '',
-        ];
-
-        switch ($message->getContentType()) {
-            case 'text/plain':
-                $content['text'] = $message->getBody();
-
-                return $content;
-            case 'text/html':
-                $content['html'] = $message->getBody();
-
-                return $content;
-        }
-
-        // RFC 1341 - text/html after text/plain in multipart
-
-        foreach ($message->getChildren() as $child) {
-            if ($child instanceof Swift_MimePart && $child->getContentType() === 'text/plain') {
-                $content['text'] = $child->getBody();
+        if ($addresses = $message->{'get'.ucfirst($type)}()) {
+            foreach ($addresses as $address) {
+                $recipients[] = new Recipient($address->getAddress(), $address->getName());
             }
         }
 
-        if (is_null($message->getBody())) {
-            return $content;
-        }
-
-        $content['html'] = $message->getBody();
-
-        return $content;
+        return $recipients;
     }
 
-    protected function getAttachments(Swift_Mime_SimpleMessage $message): array
+    protected function getAttachments(RawMessage $message): array
     {
         $attachments = [];
 
-        foreach ($message->getChildren() as $attachment) {
-            if (!$attachment instanceof Swift_Attachment && !$attachment instanceof Swift_Image) {
+        foreach ($message->getAttachments() as $attachment) {
+            /** @var DataPart $attachment */
+
+            if ($attachment->getMediaSubtype() === self::MAILERSEND_DATA_SUBTYPE) {
                 continue;
             }
 
-            $attachments[] = new Attachment($attachment->getBody(), $attachment->getFilename(),
-                $attachment->getDisposition(), $attachment->getId());
+            $attachments[] = new Attachment(
+                $attachment->getBody(),
+                $attachment->getPreparedHeaders()->get('content-disposition')?->getParameter('filename'),
+                $attachment->getPreparedHeaders()->get('content-disposition')?->getBody(),
+                $attachment->getPreparedHeaders()->get('content-id')?->getBodyAsString()
+            );
         }
 
         return $attachments;
     }
 
     /**
-     * @param  Swift_Mime_SimpleMessage  $message
+     * @param  RawMessage  $message
      * @param  array  $payload
+     * @throws \JsonException
      */
-    protected function getAdditionalData(Swift_Mime_SimpleMessage $message): array
+    protected function getAdditionalData(RawMessage $message): array
     {
         $defaultValues = [
             'template_id' => null,
@@ -217,24 +177,22 @@ class MailerSendTransport extends Transport
             'send_at' => null,
         ];
 
-        /** @var \Swift_Mime_SimpleMimeEntity $dataPart */
-        $dataPart = null;
+        foreach ($message->getAttachments() as $attachment) {
+            /** @var DataPart $attachment */
 
-        $children = collect($message->getChildren())
-            ->reject(function (\Swift_Mime_SimpleMimeEntity $entity) use (&$dataPart) {
-                if ($entity->getContentType() === self::MAILERSEND_DATA) {
-                    $dataPart = $entity;
-                    return true;
-                }
-            });
+            if ($attachment->getMediaSubtype() !== self::MAILERSEND_DATA_SUBTYPE) {
+                continue;
+            }
 
-        if (!$dataPart) {
-            return $defaultValues;
+            return array_merge($defaultValues,
+                json_decode($attachment->getBody(), true, 512, JSON_THROW_ON_ERROR));
         }
 
-        $message->setChildren($children->toArray());
+        return $defaultValues;
+    }
 
-        return array_merge($defaultValues,
-            json_decode($dataPart->getBody(), true, 512, JSON_THROW_ON_ERROR));
+    public function __toString(): string
+    {
+        return 'mailersend';
     }
 }

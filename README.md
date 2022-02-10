@@ -17,8 +17,8 @@ MailerSend Laravel Driver
 
 ## Requirements
 
-- Laravel 7.0+
-- PHP 7.4+
+- Laravel 9.0+
+- PHP 8.0+
 - Guzzle 7.0+
 - An API Key from [mailersend.com](https://www.mailersend.com)
 
