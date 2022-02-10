@@ -17,6 +17,8 @@ MailerSend Laravel Driver
 
 ## Requirements
 
+**If you require Laravel 9+ and PHP 8.0+ support, look into [main](https://github.com/mailersend/mailersend-laravel-driver/tree/main) branch**
+
 - Laravel 7.0+
 - PHP 7.4+
 - Guzzle 7.0+
