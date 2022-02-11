@@ -61,7 +61,7 @@ MAIL_FROM_NAME="App Name"
 <a name="usage"></a>
 # Usage
 
-This is an example [mailable](https://laravel.com/docs/7.x/mail#writing-mailables) that you can use to send an email with.
+This is an example [mailable](https://laravel.com/docs/9.x/mail#writing-mailables) that you can use to send an email with.
 
 `app/Mail/TestEmail.php`
 
