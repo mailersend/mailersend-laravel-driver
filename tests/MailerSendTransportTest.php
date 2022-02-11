@@ -10,10 +10,8 @@ use MailerSend\MailerSend;
 use Mockery\MockInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
-use Swift_Events_EventListener;
-use Swift_Events_SendEvent;
-use Swift_Message;
-use Swift_Mime_SimpleMessage;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mime\Part\DataPart;
 
 class MailerSendTransportTest extends TestCase
 {
@@ -63,41 +61,27 @@ class MailerSendTransportTest extends TestCase
                 $mock->allows('send')->withArgs([$emailParams])->andReturn($response);
             });
 
-        $message = (new Swift_Message('Subject'))
-            ->setFrom(['test@mailersend.com' => 'John Doe'])
-            ->setTo(['test-receive@mailersend.com'])
-            ->setBody('Here is the text message');
-
-        $sendPerformed = new class implements Swift_Events_EventListener {
-            public ?Swift_Mime_SimpleMessage $messageAfterSend;
-
-            public function sendPerformed(Swift_Events_SendEvent $event): void
-            {
-                $this->messageAfterSend = $event->getMessage();
-            }
-        };
+        $message = (new \Symfony\Component\Mime\Email())
+            ->subject('Subject')
+            ->from('John Doe <test@mailersend.com>')
+            ->to('test-receive@mailersend.com')
+            ->text('Here is the text message');
 
         $transport = new MailerSendTransport($this->mailersend);
-        $transport->registerPlugin($sendPerformed);
-        $recipients = $transport->send($message);
+        $sentMessage = $transport->send($message, Envelope::create($message));
 
-        self::assertEquals(1, $recipients);
+        self::assertNotNull($sentMessage);
 
-        self::assertEquals('messageId', $sendPerformed->messageAfterSend
-            ->getHeaders()
-            ->get('X-MailerSend-Message-Id')
-            ->getFieldBody());
+        $sentMessageString = $sentMessage->getMessage()->toString();
 
-        self::assertEquals('{"json":"value"}', $sendPerformed->messageAfterSend
-            ->getHeaders()
-            ->get('X-MailerSend-Body')
-            ->getFieldBody());
+        self::assertStringContainsString('X-MailerSend-Message-Id: messageId', $sentMessageString);
+        self::assertStringContainsString('X-MailerSend-Body: {"json":"value"}', $sentMessageString);
     }
 
     public function test_get_from(): void
     {
-        $message = (new Swift_Message(''))
-            ->setFrom(['test@mailersend.com' => 'John Doe']);
+        $message = (new \Symfony\Component\Mime\Email())
+            ->from('John Doe <test@mailersend.com>');
 
         $getFrom = $this->callMethod($this->transport, 'getFrom', [$message]);
 
@@ -106,60 +90,31 @@ class MailerSendTransportTest extends TestCase
 
     public function test_get_reply_to(): void
     {
-        $message = (new Swift_Message(''))
-            ->setReplyTo(['test@mailersend.com' => 'John Doe']);
+        $message = (new \Symfony\Component\Mime\Email())
+            ->replyTo('John Doe <test@mailersend.com>');
 
         $getReplyTo = $this->callMethod($this->transport, 'getReplyTo', [$message]);
 
         self::assertEquals(['email' => 'test@mailersend.com', 'name' => 'John Doe'], $getReplyTo);
     }
 
-    public function test_get_to(): void
+    public function test_get_recipients(): void
     {
-        $message = (new Swift_Message(''))
-            ->setTo(['test-receive@mailersend.com']);
+        $message = (new \Symfony\Component\Mime\Email())
+            ->to('test-receive@mailersend.com');
 
-        $getTo = $this->callMethod($this->transport, 'getTo', [$message]);
+        $getTo = $this->callMethod($this->transport, 'getRecipients', ['to', $message]);
 
         self::assertEquals('test-receive@mailersend.com', Arr::get(reset($getTo)->toArray(),
             'email'));
     }
 
-    public function test_get_contents(): void
-    {
-        $message = (new Swift_Message(''))
-            ->setBody('HTML', 'text/html')
-            ->addPart('Text', 'text/plain');
-
-        $getContents = $this->callMethod($this->transport, 'getContents', [$message]);
-
-        self::assertEquals(['text' => 'Text', 'html' => 'HTML'], $getContents);
-
-        $message = (new Swift_Message(''));
-
-        $getContents = $this->callMethod($this->transport, 'getContents', [$message]);
-
-        self::assertEquals(['text' => '', 'html' => ''], $getContents);
-
-        $message = (new Swift_Message('', 'Text'));
-
-        $getContents = $this->callMethod($this->transport, 'getContents', [$message]);
-
-        self::assertEquals(['text' => 'Text', 'html' => ''], $getContents);
-
-        $message = (new Swift_Message('', 'HTML', 'text/html'));
-
-        $getContents = $this->callMethod($this->transport, 'getContents', [$message]);
-
-        self::assertEquals(['text' => '', 'html' => 'HTML'], $getContents);
-    }
-
     public function test_get_attachments(): void
     {
-        $attachment = new \Swift_Attachment('data', 'filename', 'image/jpeg');
+        $attachment = new DataPart('data', 'filename', 'image/jpeg');
 
-        $message = (new Swift_Message(''))
-            ->attach($attachment);
+        $message = (new \Symfony\Component\Mime\Email())
+            ->attachPart($attachment);
 
         $getAttachments = $this->callMethod($this->transport, 'getAttachments', [$message]);
 
@@ -175,10 +130,14 @@ class MailerSendTransportTest extends TestCase
 
     public function test_get_additional_data(): void
     {
-        $message = (new Swift_Message(''))
-            ->addPart(json_encode([
-                'template_id' => 'id'
-            ], JSON_THROW_ON_ERROR), MailerSendTransport::MAILERSEND_DATA);
+        $message = (new \Symfony\Component\Mime\Email())
+            ->attachPart(new DataPart(
+                json_encode([
+                    'template_id' => 'id'
+                ], JSON_THROW_ON_ERROR),
+                MailerSendTransport::MAILERSEND_DATA_SUBTYPE.'.json',
+                MailerSendTransport::MAILERSEND_DATA_TYPE.'/'.MailerSendTransport::MAILERSEND_DATA_SUBTYPE
+            ));
 
         $getAdditionalData = $this->callMethod($this->transport, 'getAdditionalData', [$message]);
 

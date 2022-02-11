@@ -5,7 +5,8 @@ namespace MailerSend\LaravelDriver;
 use Carbon\Carbon;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Arr;
-use Swift_Message;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
 
 trait MailerSendTrait
 {
@@ -16,10 +17,16 @@ trait MailerSendTrait
         array $personalization = [],
         ?bool $precedenceBulkHeader = null,
         Carbon $sendAt = null
-    )
-    {
+    ): static {
         if ($this instanceof Mailable && $this->driver() === 'mailersend') {
-            $this->withSwiftMessage(function (Swift_Message $message) use ($tags, $variables, $template_id, $personalization, $sendAt, $precedenceBulkHeader) {
+            $this->withSymfonyMessage(function (Email $message) use (
+                $tags,
+                $variables,
+                $template_id,
+                $personalization,
+                $sendAt,
+                $precedenceBulkHeader
+            ) {
                 $mailersendData = [];
 
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_TEMPLATE_ID, $template_id);
@@ -27,13 +34,13 @@ trait MailerSendTrait
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_TAGS, $tags);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PERSONALIZATION, $personalization);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PRECENDECE_BULK_HEADER, $precedenceBulkHeader);
+                Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_SEND_AT, $sendAt?->timestamp);
 
-                if ($sendAt) {
-                    Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_SEND_AT, $sendAt->timestamp);
-                }
-
-                $message->addPart(json_encode($mailersendData, JSON_THROW_ON_ERROR),
-                    MailerSendTransport::MAILERSEND_DATA);
+                $message->attachPart(new DataPart(
+                    json_encode($mailersendData, JSON_THROW_ON_ERROR),
+                    MailerSendTransport::MAILERSEND_DATA_SUBTYPE.'.json',
+                    MailerSendTransport::MAILERSEND_DATA_TYPE.'/'.MailerSendTransport::MAILERSEND_DATA_SUBTYPE
+                ));
             });
 
             if ($template_id !== null) {

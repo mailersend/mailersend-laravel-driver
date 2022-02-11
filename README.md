@@ -7,7 +7,6 @@ MailerSend Laravel Driver
 # Table of Contents
 
 * [Installation](#installation)
-* [Upgrade and Guzzle 6 support](#upgrade)
 * [Usage](#usage)
 * [Support and Feedback](#support-and-feedback)
 * [License](#license)
@@ -17,10 +16,12 @@ MailerSend Laravel Driver
 
 ## Requirements
 
-- Laravel 7.0+
-- PHP 7.4+
+- Laravel 9.0+
+- PHP 8.0+
 - Guzzle 7.0+
 - An API Key from [mailersend.com](https://www.mailersend.com)
+
+**For Laravel 7.x - 8.x support see [1.x branch](https://github.com/mailersend/mailersend-laravel-driver/tree/1.x)**
 
 ## Setup
 
@@ -57,17 +58,10 @@ MAIL_FROM_ADDRESS=app@yourdomain.com
 MAIL_FROM_NAME="App Name"
 ```
 
-<a name="upgrade"></a>
-# Upgrade and Guzzle 6 support
-
-## Upgrading from v0.1
-
-If you are upgrading from `v0.1` branches, please do note that you will need to upgrade Guzzle to atleast version 7. [Please consult official guide for more info](https://github.com/guzzle/guzzle/blob/master/UPGRADING.md).
-
 <a name="usage"></a>
 # Usage
 
-This is an example [mailable](https://laravel.com/docs/7.x/mail#writing-mailables) that you can use to send an email with.
+This is an example [mailable](https://laravel.com/docs/9.x/mail#writing-mailables) that you can use to send an email with.
 
 `app/Mail/TestEmail.php`
 
@@ -88,22 +82,21 @@ class TestEmail extends Mailable
 
     public function build()
     {
+        // Recipient for use with variables and/or personalization
         $to = Arr::get($this->to, '0.address');
 
-        return $this->view('emails.test_html')
+        return $this
+            ->view('emails.test_html')
             ->text('emails.test_text')
             ->attachFromStorageDisk('public', 'example.png')
+            // Additional options for MailerSend API features
             ->mailersend(
-                // Template ID
-                null,
-                // Variables for simple personalization
-                [
+                template_id: null,
+                variables: [
                     new Variable($to, ['name' => 'Your Name'])
                 ],
-                // Tags
-                ['tag'],
-                // Advanced personalization
-                [
+                tags: ['tag'],
+                personalization: [
                     new Personalization($to, [
                         'var' => 'variable',
                         'number' => 123,
@@ -120,18 +113,14 @@ class TestEmail extends Mailable
                         ],
                     ])
                 ],
-                // Precedence bulk header
-                true,
-                // Send at
-                new Carbon('2022-01-28 11:53:20'),
+                precedenceBulkHeader: true,
+                sendAt: new Carbon('2022-01-28 11:53:20'),
             );
     }
 }
 ```
 
-Attachments are added through standard Laravel methods.
-
-We provide a `MailerSendTrait` trait that adds a `mailersend` method to the mailable and allows you to use templates, variables & tags support available through our API.
+We provide a `MailerSendTrait` trait that adds a `mailersend` method to the mailable and allows you to use additional options that are available through our API.
 
 After creating the mailable, you can send it using:
 
@@ -145,7 +134,7 @@ Mail::to('recipient@domain.com')
     ->send(new TestEmail());
 ```
 
-Please refer to [Laravel Mail documenation](https://laravel.com/docs/7.x/mail) and [MailerSend API documentation](https://developers.mailersend.com) for more information.
+Please refer to [Laravel Mail documenation](https://laravel.com/docs/9.x/mail) and [MailerSend API documentation](https://developers.mailersend.com) for more information.
 
 <a name="support-and-feedback"></a>
 # Support and Feedback
