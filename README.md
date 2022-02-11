@@ -16,12 +16,12 @@ MailerSend Laravel Driver
 
 ## Requirements
 
-**For Laravel 7.x - 8.x support see [1.x branch](https://github.com/mailersend/mailersend-laravel-driver/tree/1.x)**
-
 - Laravel 9.0+
 - PHP 8.0+
 - Guzzle 7.0+
 - An API Key from [mailersend.com](https://www.mailersend.com)
+
+**For Laravel 7.x - 8.x support see [1.x branch](https://github.com/mailersend/mailersend-laravel-driver/tree/1.x)**
 
 ## Setup
 
@@ -82,25 +82,21 @@ class TestEmail extends Mailable
 
     public function build()
     {
-        // Recipient
+        // Recipient for use with variables and/or personalization
         $to = Arr::get($this->to, '0.address');
 
         return $this
             ->view('emails.test_html')
             ->text('emails.test_text')
-            // Attachment (optional)
             ->attachFromStorageDisk('public', 'example.png')
+            // Additional options for MailerSend API features
             ->mailersend(
-                // Template ID (optional)
-                null,
-                // Variables for simple personalization (optional)
-                [
+                template_id: null,
+                variables: [
                     new Variable($to, ['name' => 'Your Name'])
                 ],
-                // Tags (optional)
-                ['tag'],
-                // Advanced personalization (optional)
-                [
+                tags: ['tag'],
+                personalization: [
                     new Personalization($to, [
                         'var' => 'variable',
                         'number' => 123,
@@ -117,18 +113,14 @@ class TestEmail extends Mailable
                         ],
                     ])
                 ],
-                // Precedence bulk header (optional)
-                true,
-                // Send at (optional)
-                new Carbon('2022-01-28 11:53:20'),
+                precedenceBulkHeader: true,
+                sendAt: new Carbon('2022-01-28 11:53:20'),
             );
     }
 }
 ```
 
-Attachments are added through standard Laravel methods.
-
-We provide a `MailerSendTrait` trait that adds a `mailersend` method to the mailable and allows you to use templates, variables & tags support available through our API.
+We provide a `MailerSendTrait` trait that adds a `mailersend` method to the mailable and allows you to use additional options that are available through our API.
 
 After creating the mailable, you can send it using:
 
