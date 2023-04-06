@@ -114,7 +114,7 @@ class MailerSendTransportTest extends TestCase
         $attachment = new DataPart('data', 'filename', 'image/jpeg');
 
         $message = (new \Symfony\Component\Mime\Email())
-            ->attachPart($attachment);
+            ->addPart($attachment);
 
         $getAttachments = $this->callMethod($this->transport, 'getAttachments', [$message]);
 
@@ -131,7 +131,7 @@ class MailerSendTransportTest extends TestCase
     public function test_get_additional_data(): void
     {
         $message = (new \Symfony\Component\Mime\Email())
-            ->attachPart(new DataPart(
+            ->addPart(new DataPart(
                 json_encode([
                     'template_id' => 'id'
                 ], JSON_THROW_ON_ERROR),
