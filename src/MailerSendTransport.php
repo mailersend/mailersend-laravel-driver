@@ -70,7 +70,7 @@ class MailerSendTransport implements TransportInterface
             ->setFrom($fromEmail)
             ->setFromName($fromName)
             ->setReplyTo($replyToEmail)
-            ->setReplyToName($replyToName)
+            ->setReplyToName(strval($replyToName))
             ->setRecipients($to)
             ->setCc($cc)
             ->setBcc($bcc)
