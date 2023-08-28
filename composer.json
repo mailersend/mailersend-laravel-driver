@@ -20,7 +20,7 @@
         }
     ],
     "require": {
-        "php": "^8.0 || ^8.1",
+        "php": ">=8.0",
         "illuminate/support": "^9.0 || ^10.0",
         "php-http/guzzle7-adapter": "^1.0",
         "mailersend/mailersend": "^0.8.0",
