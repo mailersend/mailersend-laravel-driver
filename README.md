@@ -61,8 +61,7 @@ MAIL_FROM_NAME="App Name"
 <a name="usage"></a>
 # Usage
 
-Using the `build` method (Laravel 8 and below)
-This is an example [mailable](https://laravel.com/docs/8.x/mail#writing-mailables) that you can use to send an email with.
+This is an example [mailable 8.x](https://laravel.com/docs/8.x/mail#writing-mailables) that you can use to send an email with.
 
 `app/Mail/TestEmail.php`
 
@@ -121,8 +120,7 @@ class TestEmail extends Mailable
 }
 ```
 
-Using the new structure (Laravel 9 and above)
-This is an example [mailable](https://laravel.com/docs/9.x/mail#writing-mailables) that you can use to send an email with.
+This is an example [mailable 9.x](https://laravel.com/docs/9.x/mail#writing-mailables) that you can use to send an email with.
 
 `app/Mail/TestEmail.php`
 
