@@ -36,7 +36,7 @@ trait MailerSendTrait
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PRECENDECE_BULK_HEADER, $precedenceBulkHeader);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_SEND_AT, $sendAt?->timestamp);
 
-                $message->attachPart(new DataPart(
+                $message->addPart(new DataPart(
                     json_encode($mailersendData, JSON_THROW_ON_ERROR),
                     MailerSendTransport::MAILERSEND_DATA_SUBTYPE.'.json',
                     MailerSendTransport::MAILERSEND_DATA_TYPE.'/'.MailerSendTransport::MAILERSEND_DATA_SUBTYPE
