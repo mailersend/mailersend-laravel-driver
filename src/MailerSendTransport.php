@@ -2,12 +2,14 @@
 
 namespace MailerSend\LaravelDriver;
 
+use MailerSend\Exceptions\MailerSendHttpException;
 use MailerSend\Helpers\Builder\Attachment;
 use MailerSend\Helpers\Builder\EmailParams;
 use MailerSend\Helpers\Builder\Recipient;
 use MailerSend\MailerSend;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mailer\Transport\TransportInterface;
@@ -43,62 +45,66 @@ class MailerSendTransport implements TransportInterface
      */
     public function send(RawMessage $message, Envelope $envelope = null): ?SentMessage
     {
-        ['email' => $fromEmail, 'name' => $fromName] = $this->getFrom($message);
-        ['email' => $replyToEmail, 'name' => $replyToName] = $this->getReplyTo($message);
+        try{
+            ['email' => $fromEmail, 'name' => $fromName] = $this->getFrom($message);
+            ['email' => $replyToEmail, 'name' => $replyToName] = $this->getReplyTo($message);
 
-        $text = $message->getTextBody();
-        $html = $message->getHtmlBody();
+            $text = $message->getTextBody();
+            $html = $message->getHtmlBody();
 
-        $to = $this->getRecipients('to', $message);
-        $cc = $this->getRecipients('cc', $message);
-        $bcc = $this->getRecipients('bcc', $message);
+            $to = $this->getRecipients('to', $message);
+            $cc = $this->getRecipients('cc', $message);
+            $bcc = $this->getRecipients('bcc', $message);
 
-        $subject = $message->getSubject();
+            $subject = $message->getSubject();
 
-        $attachments = $this->getAttachments($message);
+            $attachments = $this->getAttachments($message);
 
-        [
-            'template_id' => $template_id,
-            'variables' => $variables,
-            'tags' => $tags,
-            'personalization' => $personalization,
-            'precedence_bulk_header' => $precedenceBulkHeader,
-            'send_at' => $sendAt,
-        ] = $this->getAdditionalData($message);
+            [
+                'template_id' => $template_id,
+                'variables' => $variables,
+                'tags' => $tags,
+                'personalization' => $personalization,
+                'precedence_bulk_header' => $precedenceBulkHeader,
+                'send_at' => $sendAt,
+            ] = $this->getAdditionalData($message);
 
-        $emailParams = app(EmailParams::class)
-            ->setFrom($fromEmail)
-            ->setFromName($fromName)
-            ->setReplyTo($replyToEmail)
-            ->setReplyToName(strval($replyToName))
-            ->setRecipients($to)
-            ->setCc($cc)
-            ->setBcc($bcc)
-            ->setSubject($subject)
-            ->setHtml($html)
-            ->setText($text)
-            ->setTemplateId($template_id)
-            ->setVariables($variables)
-            ->setPersonalization($personalization)
-            ->setAttachments($attachments)
-            ->setTags($tags)
-            ->setPrecedenceBulkHeader($precedenceBulkHeader)
-            ->setSendAt($sendAt);
+            $emailParams = app(EmailParams::class)
+                ->setFrom($fromEmail)
+                ->setFromName($fromName)
+                ->setReplyTo($replyToEmail)
+                ->setReplyToName(strval($replyToName))
+                ->setRecipients($to)
+                ->setCc($cc)
+                ->setBcc($bcc)
+                ->setSubject($subject)
+                ->setHtml($html)
+                ->setText($text)
+                ->setTemplateId($template_id)
+                ->setVariables($variables)
+                ->setPersonalization($personalization)
+                ->setAttachments($attachments)
+                ->setTags($tags)
+                ->setPrecedenceBulkHeader($precedenceBulkHeader)
+                ->setSendAt($sendAt);
 
-        $response = $this->mailersend->email->send($emailParams);
+            $response = $this->mailersend->email->send($emailParams);
 
-        /** @var ResponseInterface $respInterface */
-        $respInterface = $response['response'];
+            /** @var ResponseInterface $respInterface */
+            $respInterface = $response['response'];
 
-        if ($messageId = $respInterface->getHeaderLine('X-Message-Id')) {
-            $message->getHeaders()?->addTextHeader('X-MailerSend-Message-Id', $messageId);
+            if ($messageId = $respInterface->getHeaderLine('X-Message-Id')) {
+                $message->getHeaders()?->addTextHeader('X-MailerSend-Message-Id', $messageId);
+            }
+
+            if ($body = $respInterface->getBody()->getContents()) {
+                $message->getHeaders()?->addTextHeader('X-MailerSend-Body', $body);
+            }
+
+            return new SentMessage($message, $envelope);
+        }catch (MailerSendHttpException $exception){
+            throw new TransportException($exception->getMessage(), $exception->getCode());
         }
-
-        if ($body = $respInterface->getBody()->getContents()) {
-            $message->getHeaders()?->addTextHeader('X-MailerSend-Body', $body);
-        }
-
-        return new SentMessage($message, $envelope);
     }
 
     protected function getFrom(RawMessage $message): array
