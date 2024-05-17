@@ -115,9 +115,6 @@ class MailerSendTransportTest extends TestCase
             $this->markTestSkipped('Skipped as test uses depricated method');
         }
 
-        $this->markTestSkipped(
-            'Needs update as '
-        );
         $attachment = new DataPart('data', 'filename', 'image/jpeg');
 
         $message = (new \Symfony\Component\Mime\Email())
