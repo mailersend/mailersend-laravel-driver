@@ -113,8 +113,13 @@ class MailerSendTransportTest extends TestCase
     {
         $attachment = new DataPart('data', 'filename', 'image/jpeg');
 
-        $message = (new \Symfony\Component\Mime\Email())
-            ->attachPart($attachment);
+        if (method_exists(new \Symfony\Component\Mime\Email(), 'attachPart')) {
+            $message = (new \Symfony\Component\Mime\Email())
+                ->attachPart($attachment);
+        } else {
+            $message = (new \Symfony\Component\Mime\Email())
+                ->addPart($attachment);
+        }
 
         $getAttachments = $this->callMethod($this->transport, 'getAttachments', [$message]);
 
@@ -130,14 +135,26 @@ class MailerSendTransportTest extends TestCase
 
     public function test_get_additional_data(): void
     {
-        $message = (new \Symfony\Component\Mime\Email())
-            ->attachPart(new DataPart(
-                json_encode([
-                    'template_id' => 'id'
-                ], JSON_THROW_ON_ERROR),
-                MailerSendTransport::MAILERSEND_DATA_SUBTYPE.'.json',
-                MailerSendTransport::MAILERSEND_DATA_TYPE.'/'.MailerSendTransport::MAILERSEND_DATA_SUBTYPE
-            ));
+        if (method_exists(new \Symfony\Component\Mime\Email(), 'attachPart')) {
+            $message = (new \Symfony\Component\Mime\Email())
+                ->attachPart(new DataPart(
+                    json_encode([
+                        'template_id' => 'id'
+                    ], JSON_THROW_ON_ERROR),
+                    MailerSendTransport::MAILERSEND_DATA_SUBTYPE.'.json',
+                    MailerSendTransport::MAILERSEND_DATA_TYPE.'/'.MailerSendTransport::MAILERSEND_DATA_SUBTYPE
+                ));
+        } else {
+            $message = (new \Symfony\Component\Mime\Email())
+                ->addPart(new DataPart(
+                    json_encode([
+                        'template_id' => 'id'
+                    ], JSON_THROW_ON_ERROR),
+                    MailerSendTransport::MAILERSEND_DATA_SUBTYPE.'.json',
+                    MailerSendTransport::MAILERSEND_DATA_TYPE.'/'.MailerSendTransport::MAILERSEND_DATA_SUBTYPE
+                ));
+        }
+
 
         $getAdditionalData = $this->callMethod($this->transport, 'getAdditionalData', [$message]);
 
