@@ -11,8 +11,8 @@ class LaravelDriverServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $this->app->make(MailManager::class)->extend('mailersend', function () {
-            $config = $this->app['config']->get('mailersend-driver', []);
+        $this->app->make(MailManager::class)->extend('mailersend', function (array $config) {
+            $config = array_merge($this->app['config']->get('mailersend-driver', []), $config);
 
             $mailersend = new MailerSend([
                 'api_key' => Arr::get($config, 'api_key'),
