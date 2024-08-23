@@ -23,7 +23,6 @@ class MailerSendTransport implements TransportInterface
     public const MAILERSEND_DATA_SUBTYPE = 'mailersend-data';
 
     public const MAILERSEND_DATA_TEMPLATE_ID = 'template_id';
-    public const MAILERSEND_DATA_VARIABLES = 'variables';
     public const MAILERSEND_DATA_TAGS = 'tags';
     public const MAILERSEND_DATA_PERSONALIZATION = 'personalization';
     public const MAILERSEND_DATA_PRECENDECE_BULK_HEADER = 'precedence_bulk_header';
@@ -62,7 +61,6 @@ class MailerSendTransport implements TransportInterface
 
             [
                 'template_id' => $template_id,
-                'variables' => $variables,
                 'tags' => $tags,
                 'personalization' => $personalization,
                 'precedence_bulk_header' => $precedenceBulkHeader,
@@ -81,7 +79,6 @@ class MailerSendTransport implements TransportInterface
                 ->setHtml($html)
                 ->setText($text)
                 ->setTemplateId($template_id)
-                ->setVariables($variables)
                 ->setPersonalization($personalization)
                 ->setAttachments($attachments)
                 ->setTags($tags)
@@ -176,7 +173,6 @@ class MailerSendTransport implements TransportInterface
     {
         $defaultValues = [
             'template_id' => null,
-            'variables' => [],
             'personalization' => [],
             'tags' => [],
             'precedence_bulk_header' => null,
