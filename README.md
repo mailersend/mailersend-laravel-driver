@@ -93,9 +93,6 @@ class TestEmail extends Mailable
             // Additional options for MailerSend API features
             ->mailersend(
                 template_id: null,
-                variables: [
-                    new Variable($to, ['name' => 'Your Name'])
-                ],
                 tags: ['tag'],
                 personalization: [
                     new Personalization($to, [
@@ -175,9 +172,6 @@ class TestEmail extends Mailable
         // Additional options for MailerSend API features
         $this->mailersend(
             template_id: null,
-            variables: [
-                new Variable($to, ['name' => 'Your Name'])
-            ],
             tags: ['tag'],
             personalization: [
                 new Personalization($to, [

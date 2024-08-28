@@ -161,8 +161,6 @@ class MailerSendTransportTest extends TestCase
         self::assertEquals('id', Arr::get($getAdditionalData,
             'template_id'));
         self::assertEquals([], Arr::get($getAdditionalData,
-            'variables'));
-        self::assertEquals([], Arr::get($getAdditionalData,
             'tags'));
         self::assertEquals([], Arr::get($getAdditionalData,
             'personalization'));

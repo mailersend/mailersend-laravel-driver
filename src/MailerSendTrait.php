@@ -12,7 +12,6 @@ trait MailerSendTrait
 {
     public function mailersend(
         string $template_id = null,
-        array $variables = [],
         array $tags = [],
         array $personalization = [],
         ?bool $precedenceBulkHeader = null,
@@ -21,7 +20,6 @@ trait MailerSendTrait
         if ($this instanceof Mailable && $this->driver() === 'mailersend') {
             $this->withSymfonyMessage(function (Email $message) use (
                 $tags,
-                $variables,
                 $template_id,
                 $personalization,
                 $sendAt,
@@ -30,7 +28,6 @@ trait MailerSendTrait
                 $mailersendData = [];
 
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_TEMPLATE_ID, $template_id);
-                Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_VARIABLES, $variables);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_TAGS, $tags);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PERSONALIZATION, $personalization);
                 Arr::set($mailersendData, MailerSendTransport::MAILERSEND_DATA_PRECENDECE_BULK_HEADER, $precedenceBulkHeader);
