@@ -8,7 +8,7 @@ MailerSend Laravel Driver
 
 * [Installation](#installation)
 * [Usage](#usage)
-* [Support and Feedback](#support-and-feedback)
+* [Support and  Feedback](#support-and-feedback)
 * [License](#license)
 
 <a name="installation"></a>
