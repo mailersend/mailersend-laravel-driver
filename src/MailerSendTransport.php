@@ -84,8 +84,11 @@ class MailerSendTransport implements TransportInterface
                 ->setAttachments($attachments)
                 ->setTags($tags)
                 ->setPrecedenceBulkHeader($precedenceBulkHeader)
-                ->setSendAt($sendAt)
-                ->setListUnsubscribe($listUnsubscribe);;
+                ->setSendAt($sendAt);
+
+            if (!empty($listUnsubscribe)) {
+                $emailParams->setListUnsubscribe($listUnsubscribe);
+            }
 
             $response = $this->mailersend->email->send($emailParams);
 
