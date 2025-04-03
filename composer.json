@@ -23,7 +23,7 @@
         "php": ">=8.0",
         "ext-json": "*",
         "illuminate/support": "^9.0 || ^10.0  || ^11.0 || ^12.0",
-        "mailersend/mailersend": "^0.8.0 || ^0.23.0 || ^0.24.0 || ^0.30.0",
+        "mailersend/mailersend": "^0.31.0",
         "nyholm/psr7": "^1.5",
         "php-http/guzzle7-adapter": "^1.0",
         "symfony/mailer": "^6.0 || ^7.0"

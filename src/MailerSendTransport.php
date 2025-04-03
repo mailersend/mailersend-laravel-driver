@@ -65,6 +65,7 @@ class MailerSendTransport implements TransportInterface
                 'personalization' => $personalization,
                 'precedence_bulk_header' => $precedenceBulkHeader,
                 'send_at' => $sendAt,
+                'list_unsubscribe' => $listUnsubscribe,
             ] = $this->getAdditionalData($message);
 
             $emailParams = app(EmailParams::class)
@@ -83,7 +84,8 @@ class MailerSendTransport implements TransportInterface
                 ->setAttachments($attachments)
                 ->setTags($tags)
                 ->setPrecedenceBulkHeader($precedenceBulkHeader)
-                ->setSendAt($sendAt);
+                ->setSendAt($sendAt)
+                ->setListUnsubscribe($listUnsubscribe);;
 
             $response = $this->mailersend->email->send($emailParams);
 
@@ -189,6 +191,9 @@ class MailerSendTransport implements TransportInterface
             return array_merge($defaultValues,
                 json_decode($attachment->getBody(), true, 512, JSON_THROW_ON_ERROR));
         }
+
+        $listUnsubscribeHeader = $message->getHeaders()->get('List-Unsubscribe');
+        $defaultValues['list_unsubscribe'] = $listUnsubscribeHeader ? $listUnsubscribeHeader->getBodyAsString() : null;
 
         return $defaultValues;
     }
