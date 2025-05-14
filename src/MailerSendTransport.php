@@ -42,7 +42,7 @@ class MailerSendTransport implements TransportInterface
      * @throws TransportExceptionInterface
      * @throws \MailerSend\Exceptions\MailerSendAssertException
      */
-    public function send(RawMessage $message, Envelope $envelope = null): ?SentMessage
+    public function send(RawMessage $message, ?Envelope $envelope = null): ?SentMessage
     {
         try{
             ['email' => $fromEmail, 'name' => $fromName] = $this->getFrom($message);

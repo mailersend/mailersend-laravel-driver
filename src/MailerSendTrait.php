@@ -11,11 +11,11 @@ use Symfony\Component\Mime\Part\DataPart;
 trait MailerSendTrait
 {
     public function mailersend(
-        string $template_id = null,
+        ?string $template_id = null,
         array $tags = [],
         array $personalization = [],
         ?bool $precedenceBulkHeader = null,
-        Carbon $sendAt = null
+        ?Carbon $sendAt = null
     ): static {
         if ($this instanceof Mailable && $this->driver() === 'mailersend') {
             $this->withSymfonyMessage(function (Email $message) use (
