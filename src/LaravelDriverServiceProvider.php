@@ -18,6 +18,7 @@ class LaravelDriverServiceProvider extends ServiceProvider
                 'api_key' => Arr::get($config, 'api_key'),
                 'host' => Arr::get($config, 'host'),
                 'protocol' => Arr::get($config, 'protocol'),
+                'api_version' => Arr::get($config, 'api_version'),
                 'api_path' => Arr::get($config, 'api_path'),
             ]);
 
