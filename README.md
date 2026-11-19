@@ -60,6 +60,18 @@ MAIL_FROM_ADDRESS=app@yourdomain.com
 MAIL_FROM_NAME="App Name"
 ```
 
+### API version
+
+The driver sends requests to API version `2026-10` by default, which returns the same responses as `v1`. To pin a version, or to stay on `v1`, set `MAILERSEND_API_VERSION` in your `.env` file:
+
+```dotenv
+MAILERSEND_API_VERSION=2026-10
+```
+
+If `MAILERSEND_API_PATH` is also set, it takes priority and `MAILERSEND_API_VERSION` is ignored.
+
+See the [API changelog](https://developers.mailersend.com/api/changelog) for what changes between versions.
+
 <a name="usage"></a>
 # Usage
 
