@@ -68,6 +68,8 @@ The driver sends requests to API version `2026-10` by default, which returns the
 MAILERSEND_API_VERSION=2026-10
 ```
 
+If `MAILERSEND_API_PATH` is also set, it takes priority and `MAILERSEND_API_VERSION` is ignored.
+
 See the [API changelog](https://developers.mailersend.com/api/changelog) for what changes between versions.
 
 <a name="usage"></a>
