@@ -18,8 +18,10 @@ class LaravelDriverServiceProvider extends ServiceProvider
                 'api_key' => Arr::get($config, 'api_key'),
                 'host' => Arr::get($config, 'host'),
                 'protocol' => Arr::get($config, 'protocol'),
-                'api_version' => Arr::get($config, 'api_version'),
-                'api_path' => Arr::get($config, 'api_path'),
+                // A blank MAILERSEND_API_VERSION= or MAILERSEND_API_PATH= arrives as '', which the SDK would use
+                // instead of its default; null lets the SDK default apply
+                'api_version' => Arr::get($config, 'api_version') ?: null,
+                'api_path' => Arr::get($config, 'api_path') ?: null,
             ]);
 
             return new MailerSendTransport($mailersend);

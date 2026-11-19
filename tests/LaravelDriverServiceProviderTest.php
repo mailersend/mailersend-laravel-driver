@@ -27,6 +27,13 @@ class LaravelDriverServiceProviderTest extends TestCase
         self::assertSame('v1', $this->sdkOptions()['api_path']);
     }
 
+    public function test_a_blank_api_version_and_path_use_the_default_api_version(): void
+    {
+        config(['mailersend-driver.api_version' => '', 'mailersend-driver.api_path' => '']);
+
+        self::assertSame('2026-10', $this->sdkOptions()['api_path']);
+    }
+
     public function test_a_configured_api_path_wins_over_the_api_version(): void
     {
         config(['mailersend-driver.api_version' => '2027-01', 'mailersend-driver.api_path' => 'api/v1']);
